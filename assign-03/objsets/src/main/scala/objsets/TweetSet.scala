@@ -141,17 +141,13 @@ class Empty extends TweetSet {
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
-    var newAcc: TweetSet = acc
-    if(p(elem)) newAcc = acc.incl(elem)
-    newAcc = left.filterAcc(p, newAcc)
-    right.filterAcc(p, newAcc)
+    val newAcc: TweetSet = if(p(elem)) acc.incl(elem) else acc
+    right.filterAcc(p, left.filterAcc(p, newAcc))
   }
 
   override def union(that: TweetSet): TweetSet = {
-    var newThat = that
-    if(!that.contains(elem)) newThat = that.incl(elem)
-    newThat = left.union(newThat)
-    right.union(newThat)
+    val newThat: TweetSet = if(!that.contains(elem)) that.incl(elem) else that
+    right.union(left.union(newThat))
   }
 
   override def mostRetweeted: Tweet = {
@@ -159,10 +155,8 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
   }
 
   override def find(p: (Tweet, Tweet) => Boolean, tweet: Tweet): Tweet = {
-    var newTweet: Tweet = tweet
-    if(p(elem, newTweet)) newTweet = elem
-    newTweet = left.find(p, newTweet)
-    right.find(p, newTweet)
+    val newTweet: Tweet = if(p(elem, tweet)) elem else tweet
+    right.find(p, left.find(p, newTweet))
   }
 
   override def descendingByRetweet: TweetList = {
@@ -236,11 +230,7 @@ object GoogleVsApple {
   lazy val googleTweets: TweetSet = extractTweetSet(google)
   lazy val appleTweets: TweetSet = extractTweetSet(apple)
 
-  def extractTweetSet(keywords: List[String]): TweetSet = {
-    var tweetSet: TweetSet = new Empty
-    keywords.foreach(keyword => tweetSet = TweetReader.allTweets.filter(tweet => tweet.text.contains(keyword)).union(tweetSet))
-    tweetSet
-  }
+  def extractTweetSet(keywords: List[String]): TweetSet = keywords.map(keyword => TweetReader.allTweets.filter(tweet => tweet.text.contains(keyword))).reduce((t1, t2) => t1.union(t2))
 
   /**
     * A list of all tweets mentioning a keyword from either apple or google,
