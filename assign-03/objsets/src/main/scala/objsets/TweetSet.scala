@@ -67,6 +67,12 @@ abstract class TweetSet {
     */
   def mostRetweeted: Tweet
 
+  /**
+    * Finds the tweet given the predicate and the initial tweet
+    * @param p Predicate to compare the two tweets
+    * @param tweet Initial seed tweet
+    * @return The tweet if found
+    */
   def find(p: (Tweet, Tweet) => Boolean, tweet: Tweet): Tweet
 
   /**
