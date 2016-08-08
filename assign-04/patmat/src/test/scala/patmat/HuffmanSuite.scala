@@ -1,10 +1,8 @@
 package patmat
 
-import org.scalatest.FunSuite
-
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-
 import patmat.Huffman._
 
 @RunWith(classOf[JUnitRunner])
@@ -65,11 +63,28 @@ class HuffmanSuite extends FunSuite {
     }
   }
 
+  test("encode a very short text") {
+    new TestTrees {
+      assert(encode(t1)("ab".toList) === List(0, 1))
+    }
+  }
+
   test("decode and encode a very short text should be identity") {
     new TestTrees {
       assert(decode(t1, encode(t1)("ab".toList)) === "ab".toList)
     }
   }
 
+  test("convert to code table") {
+    new TestTrees {
+      val tree = createCodeTree("ab".toList)
+      assert(convert(tree) === List(('a',List(0)), ('b',List(1))))
+    }
+  }
 
+  test("decode and quickEncode a very short text should be identity") {
+    new TestTrees {
+      assert(decode(frenchCode, quickEncode(frenchCode)("huffmanestcool".toList)) === "huffmanestcool".toList)
+    }
+  }
 }
